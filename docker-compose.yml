@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  cachingwithredis:
+    image: ${DOCKER_REGISTRY-}cachingwithredis
+    build:
+      context: .
+      dockerfile: CachingWithRedis/Dockerfile
+    depends_on:
+      app_db:
+        condition: service_healthy
+  app_db:
+    container_name: app_db
+    image: postgres
+    ports:
+      - 5432:5432
+    restart: always
+    environment:
+      POSTGRES_DB: ApplicationDatabase
+      POSTGRES_USER: myusername
+      POSTGRES_PASSWORD: password123
+    volumes:
+      - pgdata:/var/lib/postgresql/data 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
